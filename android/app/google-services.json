@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "406429456035",
+    "project_id": "practicsproject",
+    "storage_bucket": "practicsproject.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:406429456035:android:97867c0d968cea2cfbd116",
+        "android_client_info": {
+          "package_name": "com.practicsproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATfYhkpJWsKpwUwjOaxT20V3jpnPkiGyI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
