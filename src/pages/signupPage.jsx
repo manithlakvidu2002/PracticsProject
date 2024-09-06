@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ScrollView, Image, PermissionsAndroid } from 'react-native';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 import { launchImageLibrary } from 'react-native-image-picker';
 
 const SignupPage = ({ navigation }) => {
@@ -9,7 +11,6 @@ const SignupPage = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [profilePhoto, setProfilePhoto] = useState('');
 
-  
   const requestStoragePermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -23,29 +24,39 @@ const SignupPage = ({ navigation }) => {
     }
   };
 
-  
   useEffect(() => {
     requestStoragePermission();
   }, []);
 
- 
-  const handleSignup = () => {
-    if (!email || !password || !name) {
-      Alert.alert('Please fill all fields');
+  const handleSignup = async () => {
+    if (!email || !password || !name || !profilePhoto) {
+      Alert.alert('Please fill all fields and select a profile photo');
       return;
     }
 
-    auth()
-      .createUserWithEmailAndPassword(email, password)
-      .then(() => {
-        Alert.alert('User registered successfully!');
-        navigation.navigate('Login');
-      })
-      .catch(error => {
-        Alert.alert(error.message);
-      });
-  };
+    try {
+      
+      const userCredential = await auth().createUserWithEmailAndPassword(email, password);
+      const userId = userCredential.user.uid;
 
+     
+      const storageRef = storage().ref(`profilePhotos/${userId}`);
+      const uploadResult = await storageRef.putFile(profilePhoto);
+      const downloadURL = await storageRef.getDownloadURL();
+
+      
+      await firestore().collection('users').doc(userId).set({
+        name,
+        email,
+        photoURL: downloadURL
+      });
+
+      Alert.alert('User registered successfully!');
+      navigation.navigate('Login');
+    } catch (error) {
+      Alert.alert('Error', error.message);
+    }
+  };
 
   const pickImage = () => {
     launchImageLibrary(
@@ -59,7 +70,7 @@ const SignupPage = ({ navigation }) => {
         } else if (response.errorCode) {
           Alert.alert('Image Picker Error', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
-          console.log('Image URI: ', response.assets[0].uri);  
+          console.log('Image URI: ', response.assets[0].uri);
           setProfilePhoto(response.assets[0].uri);
         } else {
           Alert.alert('Unknown error occurred while selecting image');
@@ -70,89 +81,60 @@ const SignupPage = ({ navigation }) => {
 
   return (
     <View>
-
-        {/* <View style={styles.Maincontainer1}>
+      <View style={styles.Maincontainer2}>
+        <TouchableOpacity onPress={pickImage}>
           <Image
-            style={styles.Mainphoto}
-            source={require('../assets/mainPhoto.png')}
+            style={styles.profilePhoto}
+            source={profilePhoto ? { uri: profilePhoto } : require('../assets/manith.jpg')} 
           />
-        </View>  */}
+          <Text style={styles.uploadPhotoText}>Upload Profile Photo</Text>
+        </TouchableOpacity>
 
-        <View style={styles.Maincontainer2}>
-          <TouchableOpacity onPress={pickImage}>
-            <Image
-              style={styles.profilePhoto}
-              source={profilePhoto ? { uri: profilePhoto } : require('../assets/manith.jpg')} 
-            />
-            <Text style={styles.uploadPhotoText}>Upload Profile Photo</Text>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.header}>Sign Up</Text>
+
+          <TextInput
+            style={styles.input}
+            onChangeText={setEmail}
+            value={email}
+            placeholder="Email"
+            placeholderTextColor="#888"
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+
+          <TextInput
+            style={styles.input}
+            onChangeText={setName}
+            value={name}
+            placeholder="Name"
+            placeholderTextColor="#888"
+            autoCapitalize="words"
+          />
+
+          <TextInput
+            style={styles.input}
+            onChangeText={setPassword}
+            value={password}
+            placeholder="Password"
+            placeholderTextColor="#888"
+            secureTextEntry={true}
+          />
+
+          <TouchableOpacity style={styles.signupButtonContainer} onPress={handleSignup}>
+            <Text style={styles.signupButtonText}>Sign Up</Text>
           </TouchableOpacity>
-
-          <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.header}>Sign Up</Text>
-
-            <TextInput
-              style={styles.input}
-              onChangeText={setEmail}
-              value={email}
-              placeholder="Email"
-              placeholderTextColor="#888"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-
-            <TextInput
-              style={styles.input}
-              onChangeText={setName}
-              value={name}
-              placeholder="Name"
-              placeholderTextColor="#888"
-              autoCapitalize="words"
-            />
-
-            <TextInput
-              style={styles.input}
-              onChangeText={setPassword}
-              value={password}
-              placeholder="Password"
-              placeholderTextColor="#888"
-              secureTextEntry={true}
-            />
-
-            <TouchableOpacity style={styles.signupButtonContainer} onPress={handleSignup}>
-              <Text style={styles.signupButtonText}>Sign Up</Text>
-            </TouchableOpacity>
-          </ScrollView>
-        </View>
+        </ScrollView>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  Maincontainer1:{
-    marginTop:30,
-    zIndex:10
+  Maincontainer2: {
+    marginTop: 50,
+    zIndex: 10
   },
-  Maincontainer2:{
-    marginTop:50,
-    zIndex:10
-  },
-
-  container: {
-    marginTop:30,
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 20,
-    backgroundColor: '#F5F5F5',
-  },
-  // Mainphoto: {
-  //   width: '100%',
-  //   height: "70%",
-  //   // marginBottom: 20,
-  //   // borderBottomLeftRadius: 30,
-  //   // borderBottomRightRadius: 30,
-  //   // resizeMode: 'cover',
-  //   zIndex:2
-  // },
   profilePhoto: {
     width: 150,
     height: 150,
@@ -168,6 +150,13 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  container: {
+    marginTop: 30,
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#F5F5F5',
   },
   header: {
     fontSize: 28,
@@ -193,7 +182,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: '40%',
     alignItems: 'center',
-    alignSelf:'center'
+    alignSelf: 'center'
   },
   signupButtonText: {
     color: '#fff',
