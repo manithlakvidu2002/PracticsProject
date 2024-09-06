@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   imageContainer: {
-    marginTop: 0,
+    marginTop: 10,
     marginBottom: 20,
     alignItems: 'center',
     flex:1,
