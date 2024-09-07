@@ -49,13 +49,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   imageContainer: {
-    marginTop: 10,
+    marginTop: 0,
     marginBottom: 20,
     alignItems: 'center',
     flex:1,
     height:"30%"
   },
   deviceImage: {
+
     resizeMode:'cover',
     // width: "100%", 
     // height: 150,
