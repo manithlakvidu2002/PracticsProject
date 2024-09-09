@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, ScrollView, Image, PermissionsAndroid } from 'react-native';
+import React, { useState, useEffect } from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
@@ -13,9 +13,7 @@ const SignupPage = ({ navigation }) => {
 
   const requestStoragePermission = async () => {
     try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE
-      );
+      const granted = await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
       if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
         Alert.alert('Storage permission is required to upload profile photo');
       }
@@ -35,24 +33,21 @@ const SignupPage = ({ navigation }) => {
     }
 
     try {
-      
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);
       const userId = userCredential.user.uid;
-
-     
+      
       const storageRef = storage().ref(`profilePhotos/${userId}`);
-      const uploadResult = await storageRef.putFile(profilePhoto);
+      await storageRef.putFile(profilePhoto);
       const downloadURL = await storageRef.getDownloadURL();
 
-      
       await firestore().collection('users').doc(userId).set({
         name,
         email,
-        photoURL: downloadURL
+        photoURL: downloadURL,
       });
 
       Alert.alert('User registered successfully!');
-      navigation.navigate('Login');
+      navigation.navigate('Home');
     } catch (error) {
       Alert.alert('Error', error.message);
     }
@@ -60,17 +55,13 @@ const SignupPage = ({ navigation }) => {
 
   const pickImage = () => {
     launchImageLibrary(
-      {
-        mediaType: 'photo',
-        quality: 1,
-      },
+      { mediaType: 'photo', quality: 1 },
       response => {
         if (response.didCancel) {
           console.log('User cancelled image picker');
         } else if (response.errorCode) {
           Alert.alert('Image Picker Error', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
-          console.log('Image URI: ', response.assets[0].uri);
           setProfilePhoto(response.assets[0].uri);
         } else {
           Alert.alert('Unknown error occurred while selecting image');
@@ -85,7 +76,7 @@ const SignupPage = ({ navigation }) => {
         <TouchableOpacity onPress={pickImage}>
           <Image
             style={styles.profilePhoto}
-            source={profilePhoto ? { uri: profilePhoto } : require('../assets/manith.jpg')} 
+            source={profilePhoto ? { uri: profilePhoto } : require('../assets/manith.jpg')}
           />
           <Text style={styles.uploadPhotoText}>Upload Profile Photo</Text>
         </TouchableOpacity>
