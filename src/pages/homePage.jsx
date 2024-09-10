@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import UserPage from './userPage';
+import UserListPage from './userListPage';
 
 const ItemsPage = () => (
   <View style={styles.pageContainer}>
@@ -18,7 +19,7 @@ const LabsPage = () => (
 
 
 
-const HomePageComponent = () => {
+const HomePageComponent = ({ navigation }) =>  {
   return (
     <View style={styles.container}>
       <View style={styles.topContainer}>
@@ -32,11 +33,13 @@ const HomePageComponent = () => {
         </View>
       </View>
 
-      <View style={styles.statboxMain}>
-        <Text style={styles.statText}>
-          Registered User Count <Text style={styles.statValueMain}>+10</Text>
-        </Text>
-      </View>
+      <TouchableOpacity onPress={() => navigation.navigate('UserListPage')}>
+        <View style={styles.statboxMain}>
+          <Text style={styles.statText}>
+            Registered User Count <Text style={styles.statValueMain}>+10</Text>
+          </Text>
+        </View>
+      </TouchableOpacity>
 
       <Text style={styles.headerText}>Most Counted Items</Text>
 

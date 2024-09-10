@@ -5,6 +5,7 @@ import SignupPage from './src/pages/signupPage';
 import HomePage from './src/pages/homePage';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import UserListPage from './src/pages/userListPage';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,6 +26,11 @@ const App = () => {
         <Stack.Screen 
           name="Home" 
           component={HomePage}
+          options={{ headerShown: false }}
+        />
+         <Stack.Screen
+          name="UserListPage"
+          component={UserListPage}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

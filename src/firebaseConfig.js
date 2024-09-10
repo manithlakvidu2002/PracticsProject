@@ -1,5 +1,7 @@
 import firebase from '@react-native-firebase/app';
 import '@react-native-firebase/database';
+import 'firebase/database';  
+import 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: "AIzaSyATfYhkpJWsKpwUwjOaxT20V3jpnPkiGyI",
@@ -17,3 +19,10 @@ if (!firebase.apps.length) {
 }
 
 export default firebase;
+
+const db = firebase.database();  
+const storage = firebase.storage();  
+
+export { db, storage };
+
+
